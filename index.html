@@ -1,45 +1,168 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Расчет фасадов</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фабрика мебели "Фаворит" | Калькулятор</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        input, select { margin: 10px 0; padding: 10px; width: 100%; box-sizing: border-box; }
-        button { background: #007bff; color: white; border: none; padding: 15px; width: 100%; cursor: pointer; }
+        :root { --primary: #2c3e50; --accent: #27ae60; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--primary); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 15px; }
+        
+        .setup-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: var(--bg); padding: 20px; border-radius: 10px; margin-bottom: 25px; }
+        .input-row { display: grid; grid-template-columns: 1fr 1fr 1fr 120px 100px; gap: 10px; margin-bottom: 20px; }
+        
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; color: #7f8c8d; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #dcdde1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        
+        button { cursor: pointer; transition: 0.3s; font-weight: bold; text-transform: uppercase; border: none; border-radius: 6px; }
+        .add-btn { background: var(--accent); color: white; }
+        .add-btn:hover { background: #219150; }
+        .export-btn { background: var(--primary); color: white; padding: 15px 30px; margin-top: 20px; width: 100%; font-size: 16px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th { background: var(--primary); color: white; padding: 12px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        .footer-note { font-size: 12px; color: #95a5a6; margin-top: 20px; text-align: center; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Новый расчет фасада</h2>
-        <select id="tech">
-            <option value="пленка">Пленка ПВХ</option>
-            <option value="эмаль">Эмаль (краска)</option>
-        </select>
-        <input type="number" id="h" placeholder="Высота, мм">
-        <input type="number" id="w" placeholder="Ширина, мм">
-        <input type="number" id="q" placeholder="Количество, шт">
-        <button onclick="calculate()">Рассчитать для 1С</button>
-        <div id="result"></div>
+
+<div class="container">
+    <h2>Мебель, которая становится любимой</h2>
+    
+    <div class="setup-section">
+        <div>
+            <label>Тип покрытия</label>
+            <select id="mainTech" onchange="toggleFields()">
+                <option value="Пленка">Пленка ПВХ</option>
+                <option value="Эмаль">Эмаль (Покраска)</option>
+            </select>
+        </div>
+        <div>
+            <label>Толщина МДФ</label>
+            <select id="mdf">
+                <option value="16">16 мм</option>
+                <option value="19">19 мм</option>
+                <option value="22">22 мм</option>
+            </select>
+        </div>
+        <div id="paintTypeGroup" style="display:none;">
+            <label>Вид покраски</label>
+            <select id="paintStyle">
+                <option value="Матовая">Матовая</option>
+                <option value="Глянцевая">Глянцевая</option>
+                <option value="Спецэффект">Спецэффект</option>
+            </select>
+        </div>
     </div>
 
-    <script>
-        function calculate() {
-            const h = document.getElementById('h').value;
-            const w = document.getElementById('w').value;
-            const q = document.getElementById('q').value;
-            const tech = document.getElementById('tech').value;
-            
-            // Ваша логика из Excel
-            let area = (h * w / 1000000) * q;
-            if (area < 0.1 * q) area = 0.1 * q; // Минималка 0.1 м2
+    <div class="input-row">
+        <div><label>Высота</label><input type="number" id="h" placeholder="мм"></div>
+        <div><label>Ширина</label><input type="number" id="w" placeholder="мм"></div>
+        <div><label>Кол-во</label><input type="number" id="q" placeholder="шт"></div>
+        <div><label>Фреза</label>
+            <select id="frez">
+                <option value="Стандарт">Стандарт</option>
+                <option value="Мыло">Мыло</option>
+                <option value="Интегрированная">Интегрированная</option>
+            </select>
+        </div>
+        <div><label>&nbsp;</label><button class="add-btn" onclick="addItem()">+</button></div>
+    </div>
 
-            document.getElementById('result').innerHTML = `
-                <hr>
-                <p>Площадь для 1С: <b>${area.toFixed(2)} м²</b></p>
-                <p>Технология: ${tech}</p>
-            `;
-        }
-    </script>
+    <table id="resultTable">
+        <thead>
+            <tr>
+                <th>Деталь</th>
+                <th>Размер</th>
+                <th>МДФ (м²)</th>
+                <th>Услуга (м²)</th>
+                <th>Удалить</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button class="export-btn" onclick="exportTo1C()">Сформировать файл для 1С (.csv)</button>
+    <p class="footer-note">Минимальная расчетная площадь детали — 0.1 м²</p>
+</div>
+
+<script>
+    let items = [];
+
+    function toggleFields() {
+        const tech = document.getElementById('mainTech').value;
+        document.getElementById('paintTypeGroup').style.display = tech === 'Эмаль' ? 'block' : 'none';
+    }
+
+    function addItem() {
+        const h = parseFloat(document.getElementById('h').value);
+        const w = parseFloat(document.getElementById('w').value);
+        const q = parseInt(document.getElementById('q').value);
+        const tech = document.getElementById('mainTech').value;
+        const mdf = document.getElementById('mdf').value;
+        const frez = document.getElementById('frez').value;
+
+        if (!h || !w || !q) { alert("Введите размеры и количество"); return; }
+
+        // Расчет площади (Ваша формула из Excel)
+        let areaOne = (h * w) / 1000000;
+        let areaBilled = Math.max(areaOne, 0.1) * q; // Минимум 0.1 м2
+        let areaReal = areaOne * q;
+
+        const item = {
+            name: `Фасад ${tech} ${mdf}мм`,
+            size: `${h}x${w}`,
+            mdfArea: areaReal.toFixed(3),
+            workArea: areaBilled.toFixed(3),
+            tech: tech,
+            frez: frez
+        };
+
+        items.push(item);
+        updateTable();
+        
+        // Очистка полей для быстрого ввода следующей детали
+        document.getElementById('h').value = '';
+        document.getElementById('w').value = '';
+        document.getElementById('h').focus();
+    }
+
+    function updateTable() {
+        const tbody = document.querySelector("#resultTable tbody");
+        tbody.innerHTML = items.map((it, idx) => `
+            <tr>
+                <td>${it.name} (${it.frez})</td>
+                <td>${it.size}</td>
+                <td>${it.mdfArea}</td>
+                <td>${it.workArea}</td>
+                <td><button onclick="items.splice(${idx}, 1); updateTable()">✕</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function exportTo1C() {
+        if (items.length === 0) return alert("Список пуст");
+        
+        // Формируем CSV с разделителем ;
+        let csv = "\uFEFF"; // BOM для корректного отображения кириллицы в Excel
+        csv += "Номенклатура;Характеристика;Количество;ЕдИзм\n";
+        
+        items.forEach(it => {
+            csv += `${it.name};${it.size};${it.mdfArea};м2\n`;
+            csv += `Услуга покрытия ${it.tech};${it.frez};${it.workArea};м2\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", `zakaz_favorit_${new Date().toLocaleDateString()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
 </body>
 </html>

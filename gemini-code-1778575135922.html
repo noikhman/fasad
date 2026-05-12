@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Расчет фасадов</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input, select { margin: 10px 0; padding: 10px; width: 100%; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; padding: 15px; width: 100%; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Новый расчет фасада</h2>
+        <select id="tech">
+            <option value="пленка">Пленка ПВХ</option>
+            <option value="эмаль">Эмаль (краска)</option>
+        </select>
+        <input type="number" id="h" placeholder="Высота, мм">
+        <input type="number" id="w" placeholder="Ширина, мм">
+        <input type="number" id="q" placeholder="Количество, шт">
+        <button onclick="calculate()">Рассчитать для 1С</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function calculate() {
+            const h = document.getElementById('h').value;
+            const w = document.getElementById('w').value;
+            const q = document.getElementById('q').value;
+            const tech = document.getElementById('tech').value;
+            
+            // Ваша логика из Excel
+            let area = (h * w / 1000000) * q;
+            if (area < 0.1 * q) area = 0.1 * q; // Минималка 0.1 м2
+
+            document.getElementById('result').innerHTML = `
+                <hr>
+                <p>Площадь для 1С: <b>${area.toFixed(2)} м²</b></p>
+                <p>Технология: ${tech}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
